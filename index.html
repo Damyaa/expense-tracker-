@@ -1,0 +1,350 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Expense Tracker</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f2f2;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .total {
+            text-align: center;
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+
+        .total h2 {
+            font-size: 28px;
+            margin-top: 8px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        .add-button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            background: #333;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+
+        .add-button:hover {
+            opacity: 0.8;
+        }
+
+        ul {
+            list-style: none;
+            margin-top: 25px;
+        }
+
+        li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f5f5f5;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+        }
+
+        .expense-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .expense-name {
+            font-weight: bold;
+        }
+
+        .expense-amount {
+            color: #555;
+        }
+
+        .delete-button {
+            padding: 7px 10px;
+            border: none;
+            border-radius: 5px;
+            background: #555;
+            color: white;
+            cursor: pointer;
+        }
+
+        .empty {
+            text-align: center;
+            color: #888;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>Expense Tracker</h1>
+
+        <div class="total">
+            <p>Total Expenses</p>
+            <h2 id="totalAmount">$0.00</h2>
+        </div>
+
+        <div class="input-group">
+            <label for="expenseName">Expense</label>
+            <input
+                type="text"
+                id="expenseName"
+                placeholder="Example: Food"
+            >
+        </div>
+
+        <div class="input-group">
+            <label for="expenseAmount">Amount</label>
+            <input
+                type="number"
+                id="expenseAmount"
+                placeholder="Example: 20"
+                min="0"
+                step="0.01"
+            >
+        </div>
+
+        <button class="add-button" onclick="addExpense()">
+            Add Expense
+        </button>
+
+        <ul id="expenseList"></ul>
+
+        <p id="emptyMessage" class="empty">
+            No expenses yet.
+        </p>
+
+    </div>
+
+
+    <script>
+
+        let expenses =
+            JSON.parse(localStorage.getItem("expenses")) || [];
+
+
+        function saveExpenses() {
+
+            localStorage.setItem(
+                "expenses",
+                JSON.stringify(expenses)
+            );
+
+        }
+
+
+        function displayExpenses() {
+
+            const list =
+                document.getElementById("expenseList");
+
+            const emptyMessage =
+                document.getElementById("emptyMessage");
+
+            const totalAmount =
+                document.getElementById("totalAmount");
+
+
+            list.innerHTML = "";
+
+
+            if (expenses.length === 0) {
+
+                emptyMessage.style.display = "block";
+
+            } else {
+
+                emptyMessage.style.display = "none";
+
+            }
+
+
+            let total = 0;
+
+
+            expenses.forEach(function(expense, index) {
+
+                total += expense.amount;
+
+
+                const li =
+                    document.createElement("li");
+
+
+                const info =
+                    document.createElement("div");
+
+                info.className = "expense-info";
+
+
+                const name =
+                    document.createElement("span");
+
+                name.className = "expense-name";
+
+                name.textContent = expense.name;
+
+
+                const amount =
+                    document.createElement("span");
+
+                amount.className = "expense-amount";
+
+                amount.textContent =
+                    "$" + expense.amount.toFixed(2);
+
+
+                const deleteButton =
+                    document.createElement("button");
+
+                deleteButton.className =
+                    "delete-button";
+
+                deleteButton.textContent = "Delete";
+
+
+                deleteButton.onclick = function() {
+
+                    expenses.splice(index, 1);
+
+                    saveExpenses();
+
+                    displayExpenses();
+
+                };
+
+
+                info.appendChild(name);
+
+                info.appendChild(amount);
+
+
+                li.appendChild(info);
+
+                li.appendChild(deleteButton);
+
+
+                list.appendChild(li);
+
+            });
+
+
+            totalAmount.textContent =
+                "$" + total.toFixed(2);
+
+        }
+
+
+        function addExpense() {
+
+            const nameInput =
+                document.getElementById("expenseName");
+
+            const amountInput =
+                document.getElementById("expenseAmount");
+
+
+            const name =
+                nameInput.value.trim();
+
+            const amount =
+                parseFloat(amountInput.value);
+
+
+            if (name === "" || isNaN(amount) || amount <= 0) {
+
+                alert("Please enter a valid expense.");
+
+                return;
+
+            }
+
+
+            expenses.push({
+
+                name: name,
+
+                amount: amount
+
+            });
+
+
+            saveExpenses();
+
+            displayExpenses();
+
+
+            nameInput.value = "";
+
+            amountInput.value = "";
+
+            nameInput.focus();
+
+        }
+
+
+        displayExpenses();
+
+    </script>
+
+</body>
+</html>
+```
